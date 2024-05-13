@@ -1,0 +1,5 @@
+a aplicação vai abrir ou criar um arquivo de banco de dados a partir de um csv
+
+os dados do banco de dados podem ser tratados
+
+vai ser gerado um relatório do banco de dados
