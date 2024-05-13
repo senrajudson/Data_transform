@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 # Definir o tamanho do conjunto de dados fake
-num_rows = 100
+num_rows = 100000
 
 # Criar um DataFrame com dados fake
 df_fake = pd.DataFrame({

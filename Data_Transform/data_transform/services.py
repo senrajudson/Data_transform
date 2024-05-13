@@ -1,12 +1,26 @@
+from tkinter import END
 import pandas
 import seaborn as sns
 import matplotlib.pyplot as plt
+import sqlite3
+import csv
 ########################################################################################################################
 
 class DataTransformServices:
     def __init__(self):
+        self._db_arquive = None
         self._data_csv_file = None
         self._column_name = None
+
+    @property
+    def db_arquive(self):
+        return self._db_arquive
+    
+    @db_arquive.setter
+    def db_arquive(self, file_path):
+        self._db_arquive = file_path
+        conn = sqlite3.connect(f"{self._db_arquive}")
+        conn.close()
 
     @property
     def data_csv_file(self):
@@ -15,7 +29,7 @@ class DataTransformServices:
     @data_csv_file.setter
     def data_csv_file(self, file_path):
         self._data_csv_file = file_path
-        self._df = pandas.read_csv(self.data_csv_file)
+        self._df = "pandas.read_csv(self.data_csv_file)"
 
     @property
     def column_name(self):
@@ -25,17 +39,29 @@ class DataTransformServices:
     def column_name(self, name):
         self._column_name = name
     
-    def contar_tipos_de_dados(self):
-    
-        # Verificar o tipo de cada valor na coluna específica
-        tipos_de_dados = self._df[self._column_name].apply(lambda x: 'String' if isinstance(x, str) else 'Tipo {}'.format(type(x).__name__))
-        
-        # Contar quantos são strings e quantos são números
-        contagem = tipos_de_dados.value_counts()
-        print("Contagem de tipos de dados na coluna '{}':".format(self._column_name))
+    def contar_tipos_de_dados(self, column=None):
+
+        if column is not None:
+            array_data = {}
+            for chunk in pandas.read_csv(self._data_csv_file, chunksize = 1000000):
+                tipos_de_dados = chunk[column].apply(lambda x: 'String' if isinstance(x, str) else 'Tipo {}'.format(type(x).__name__))
+                array_data[column] = array_data.get(column, pandas.Series()).add(tipos_de_dados.value_counts(), fill_value=0)
+                
+        if column==None:
+            array_data = {}
+            for chunk in pandas.read_csv(self._data_csv_file, chunksize = 1000000):
+                for column in chunk:
+                    tipos_de_dados = chunk[column].apply(lambda x: 'String' if isinstance(x, str) else 'Tipo {}'.format(type(x).__name__))
+                    array_data[column] = array_data.get(column, pandas.Series()).add(tipos_de_dados.value_counts(), fill_value=0)
+
+        if array_data:
+            contagem = pandas.concat(array_data, ignore_index=False)
+
+        print("Contagem de tipos de dados na coluna:")
         print(contagem)
+
     
-    def converter_column_value(self):
+    def converter_column_value(self, column):
 
         # Definir uma função para converter os valores da coluna Salário
         def converter_valores(valor):
@@ -43,16 +69,18 @@ class DataTransformServices:
                 return float(valor)
             except ValueError:
                 return valor
-            
-        self._df[self._column_name] = self._df[self._column_name].apply(converter_valores)
+        for chunk in pandas.read_csv(self._data_csv_file, chunksize=100000):
+            self._df[column] = self._df[column].apply(converter_valores)
+
+        ### temos um problema, onde os dados convertidos vão ficar armazenados?
         return self._df
     
-    def remover_strings(self):
+    def remover_strings(self, column):
 
         def tem_string(val):
             return isinstance(val, str)
         
-        self._df = self._df[~self._df[self._column_name].apply(tem_string)]
+        self._df = self._df[~self._df[column].apply(tem_string)]
         # print(self._df)
         return self._df
         

@@ -1,4 +1,4 @@
-from services import DataTransformServices
+from Data_Transform.data_transform.services import DataTransformServices
 
 services = DataTransformServices()
 
@@ -11,20 +11,20 @@ def dataframe_coluna(column):
     services.column_name = column
 
 # Definir uma função para converter os valores da coluna Salário
-def converter_valores():
-    services.converter_column_value()
+def converter_valores(column):
+    services.converter_column_value(column)
 
 # Função para printar tipos dos dados 
-def printar_tipos_de_dados():
-    services.contar_tipos_de_dados()
+def printar_tipos_de_dados(column=None):
+    services.contar_tipos_de_dados(column)
 
 # Função para remover coluna de dataframe
-def remover_coluna():
-    services.remover_coluna()
+def remover_coluna(name):
+    services.remover_coluna(name)
 
 # Função para remover strings
-def remover_strings():
-    services.remover_strings()
+def remover_strings(column):
+    services.remover_strings(column)
 
 # Função para plotar mapa de correlação
 def plotar_mapa_de_correlacao():
