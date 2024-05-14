@@ -65,67 +65,19 @@ class DataTransformServices:
         print(contagem)
 
     
-    def converter_column_value(self, column=None):
-        conn = sqlite3.connect(self._db_arquive)
-        cursor = conn.cursor()
+    def converter_column_value(self, column):
 
-        if column != None:
-          cursor.execute('''
-          ALTER TABLE dados_fake ADD COLUMN Nova_coluna REAL
-          ''')
+        # Definir uma função para converter os valores da coluna Salário
+        def converter_valores(valor):
+            try:
+                return float(valor)
+            except ValueError:
+                return valor
+        for chunk in pandas.read_csv(self._data_csv_file, chunksize=100000):
+            self._df[column] = self._df[column].apply(converter_valores)
 
-          cursor.execute(f'''
-          UPDATE dados_fake SET Nova_coluna = CASE
-                        WHEN {column} LIKE '%[a-zA-Z]%' THEN NULL
-                        ELSE CAST({column} AS REAL)
-                        END
-          ''')
-
-          cursor.execute(f'''
-          ALTER TABLE {self._db_arquive} DROP COLUMN {column}
-          ''')
-
-          cursor.execute(f'''
-          ALTER TABLE {self._db_arquive} RENAME COLUMN Nova_coluna TO {column}
-          ''')
-
-          cursor.execute(f'''
-          DELETE FROM {self._db_arquive} WHERE {column} = 0.0
-          ''')
-
-        # Obtenha os nomes de todas as colunas, exceto a coluna de interesse
-        cursor.execute(f'''
-            SELECT name FROM pragma_table_info('dados_fake')
-        ''')
-
-        colunas = [row[0] for row in cursor.fetchall()]
-
-        for coluna in colunas:
-          cursor.execute('''
-          ALTER TABLE dados_fake ADD COLUMN Nova_coluna REAL
-          ''')
-
-          cursor.execute(f'''
-          UPDATE dados_fake SET Nova_coluna = CASE
-                        WHEN {coluna} LIKE '%[a-zA-Z]%' THEN NULL
-                        ELSE CAST({coluna} AS REAL)
-                        END
-          ''')
-
-          cursor.execute(f'''
-          ALTER TABLE {self._db_arquive} DROP COLUMN {coluna}
-          ''')
-
-          cursor.execute(f'''
-          ALTER TABLE {self._db_arquive} RENAME COLUMN Nova_coluna TO {coluna}
-          ''')
-
-          cursor.execute(f'''
-          DELETE FROM {self._db_arquive} WHERE {coluna} = 0.0
-          ''')
-
-        conn.commit()
-        conn.close()
+        ### temos um problema, onde os dados convertidos vão ficar armazenados?
+        return self._df
     
     def remover_strings(self, column):
 

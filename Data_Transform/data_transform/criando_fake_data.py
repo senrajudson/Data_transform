@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+import random
+import string
 
 # Definir o tamanho do conjunto de dados fake
 num_rows = 100000
@@ -12,12 +14,21 @@ df_fake = pd.DataFrame({
     'Salário': np.random.uniform(1000, 5000, size=num_rows)  # Coluna de salários fake entre 1000 e 5000
 })
 
-# Função para converter aleatoriamente alguns salários em strings
+##### Função para converter aleatoriamente alguns salários em strings
 def convert_to_string(salario):
     if np.random.rand() < 0.1:  # Probabilidade de 10% de transformar o salário em string
-        return str(salario)+"str"
+        string_rand = ''.join(random.choices(string.ascii_letters, k=3))
+        return string_rand
     else:
         return salario
+
+# Função para converter aleatoriamente alguns salários em strings com uma string no meio
+# def convert_to_string(salario):
+#     if np.random.rand() < 0.1:  # Probabilidade de 10% de transformar o salário em string
+#         string_aleatoria = ''.join(random.choices(string.ascii_letters, k=3))  # Gera uma string aleatória com 3 letras
+#         return f"{str(salario)[:2]}{string_aleatoria}{str(salario)[2:]}"  # Adiciona a string aleatória no meio
+#     else:
+#         return salario
 
 # Aplicar a função à coluna de salários
 df_fake['Salário'] = df_fake['Salário'].apply(convert_to_string)
