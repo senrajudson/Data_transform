@@ -1,0 +1,3 @@
+O "services" é uma parte do projeto que interliga as API com as regras de negócio da empresa, como banco de dados e outras coisas. O "services" contém coisas como tratamento de dados 
+para serem armazenados no banco dados. O "services" normalmente possuí uma "interface" para receber as classes que fazem o tratamento dos dados. A interface é importante 
+porque isso permite que as classes sejam substituidas posteriormente, caso haja uma mudança na regra de negócio da empresa.

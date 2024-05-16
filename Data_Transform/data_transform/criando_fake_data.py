@@ -1,44 +1,35 @@
-import pandas as pd
+import csv
 import numpy as np
 import random
 import string
+from tqdm import tqdm
 
 # Definir o tamanho do conjunto de dados fake
-num_rows = 100000
+num_rows = 500000
 
-# Criar um DataFrame com dados fake
-df_fake = pd.DataFrame({
-    'ID': np.arange(1, num_rows + 1),  # Coluna de IDs sequenciais
-    'Nome': ['Nome' + str(i) for i in range(1, num_rows + 1)],  # Coluna de nomes fake
-    'Idade': np.random.randint(18, 65, size=num_rows),  # Coluna de idades fake entre 18 e 64 anos
-    'Salário': np.random.uniform(1000, 5000, size=num_rows)  # Coluna de salários fake entre 1000 e 5000
-})
+# Abrir o arquivo CSV para escrita
+with open('fake_data.csv', 'w', newline='', encoding='utf-16') as csvfile:
+    fieldnames = ['ID', 'Nome', 'Idade', 'Salário']
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
-##### Função para converter aleatoriamente alguns salários em strings
-def convert_to_string(salario):
-    if np.random.rand() < 0.1:  # Probabilidade de 10% de transformar o salário em string
-        string_rand = ''.join(random.choices(string.ascii_letters, k=3))
-        return string_rand
-    else:
-        return salario
+    # Escrever cabeçalho
+    writer.writeheader()
 
-# Função para converter aleatoriamente alguns salários em strings com uma string no meio
-# def convert_to_string(salario):
-#     if np.random.rand() < 0.1:  # Probabilidade de 10% de transformar o salário em string
-#         string_aleatoria = ''.join(random.choices(string.ascii_letters, k=3))  # Gera uma string aleatória com 3 letras
-#         return f"{str(salario)[:2]}{string_aleatoria}{str(salario)[2:]}"  # Adiciona a string aleatória no meio
-#     else:
-#         return salario
+    with tqdm(total=num_rows) as pbar:  # Inicializar a barra de progresso
+        # Escrever os dados fake
+        for i in range(1, num_rows + 1):
+            # Gerar dados fake
+            ID = i
+            Nome = f'Nome{i}'
+            Idade = np.random.randint(18, 65)
+            Salário = np.random.uniform(1000, 5000)
 
-# Aplicar a função à coluna de salários
-df_fake['Salário'] = df_fake['Salário'].apply(convert_to_string)
+            # Converter aleatoriamente alguns salários em strings
+            if np.random.rand() < 0.1:
+                Salário = ''.join(random.choices(string.ascii_letters, k=3))
 
-# Verificar os tipos de dados da coluna 'Salário'
-tipos_de_dados = df_fake['Salário'].apply(lambda x: type(x).__name__)
+            # Escrever na linha do CSV
+            writer.writerow({'ID': ID, 'Nome': Nome, 'Idade': Idade, 'Salário': Salário})
+            pbar.update(1)
 
-# Imprimir os tipos de dados
-print("Tipos de dados da coluna 'Salário':")
-print(tipos_de_dados)
-
-# Exportar o DataFrame para um arquivo CSV
-df_fake.to_csv('dados_fake.csv', index=False, float_format="%.2f")
+print("Dados foram escritos!")

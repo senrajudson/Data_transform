@@ -21,13 +21,13 @@ with open ('dados_fake.csv', 'r', newline = '', encoding = 'utf-8') as file:
   csv_reader = csv.reader(file)
   next(csv_reader)
   cursor.executemany(f'''
-INSERT INTO {tabela} (
-{', ' .join(colunas)}
-) VALUES (
-{', ' .join(['?'] * len(colunas))}
-)
+  INSERT INTO {tabela} (
+  {', ' .join(colunas)}
+  ) VALUES (
+  {', ' .join(['?'] * len(colunas))}
+  )
 
-''', csv_reader)
+  ''', csv_reader)
   
 conn.commit()
 conn.close()
