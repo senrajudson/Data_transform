@@ -5,10 +5,10 @@ import string
 from tqdm import tqdm
 
 # Definir o tamanho do conjunto de dados fake
-num_rows = 500000
+num_rows = 5000000
 
 # Abrir o arquivo CSV para escrita
-with open('fake_data.csv', 'w', newline='', encoding='utf-16') as csvfile:
+with open('fake_data.csv', 'w', newline='', encoding='utf-32') as csvfile:
     fieldnames = ['ID', 'Nome', 'Idade', 'Salário']
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 

@@ -8,15 +8,17 @@ def db_arquive(db_arquive):
 
 # definir arquivo csv
 def data_csv_file(data_csv_file):
-    services.data_csv_file = data_csv_file
     
     try:
+        services.data_csv_file = data_csv_file
         services.open_csv_file()
+
     except:
         services.detect_encoding(f"{services._data_csv_file}.csv")
         services.convert_encoding(f"{services._data_csv_file}.csv", f"{services._data_csv_file}.csv", services._encoding, 'latin-1')
-    finally:
         services.open_csv_file()
+
+    services.move_csv_file()
 
 # Definir uma função para converter os valores de uma coluna
 def converter_valores(column=None):
@@ -39,12 +41,13 @@ def remover_coluna(name):
 def plotar_mapa_de_correlacao(coluna=None):
     services.plot_correlation_heatmap(coluna)
 
+
 ### possíveis new features
-def printar_primeiras_linhas(num_linhas):
-    services.imprimir_primeiras_linhas_do_db(num_linhas)
+def printar_primeiras_linhas():
+    return
 
 def remover_linhas_arquivo_original():
     return
 
-def renomear_coluna(coluna, rename):
-    services.sql_renomear_coluna(coluna, rename)
+def renomear_coluna():
+    return

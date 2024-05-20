@@ -9,7 +9,6 @@ import os
 import chardet
 import codecs
 from tqdm import tqdm
-import pandas
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -28,7 +27,7 @@ class DataTransformServices:
     @db_arquive.setter
     def db_arquive(self, file_path):
         try:
-            self._db_arquive = f"CACHE_DADOS/{file_path}"
+            self._db_arquive = file_path
             conn = sqlite3.connect(self._db_arquive)
             conn.close()
         except ValueError:
@@ -41,16 +40,11 @@ class DataTransformServices:
     @data_csv_file.setter
     def data_csv_file(self, file_path):
         self._data_csv_file = re.sub(r'\.\w+$', '', file_path)
-        conn = sqlite3.connect(f"{self._data_csv_file}.db")
-        conn.close()
-        self.move_csv_file()
-
         return self._data_csv_file
     
     def conn_and_cursor(self, db_file):
         self._conn = sqlite3.connect(db_file)
         self._cursor = self._conn.cursor()
-        return self._conn
 
     def close_conn_and_cursor(self):
         self._cursor.close()
@@ -59,6 +53,8 @@ class DataTransformServices:
 
     def open_csv_file(self):
 
+        self.conn_and_cursor(f"{self._data_csv_file}.db")
+
         with open(f"{self._data_csv_file}.csv", 'r', newline = '', encoding = 'latin-1') as file:
             csv_reader = csv.reader(file)
             colunas = next(csv_reader)
@@ -66,6 +62,8 @@ class DataTransformServices:
                                                 csv_reader, self.sql_create_table(colunas), self.sql_insert_data(colunas))
             
             print("encode_type = 'latin-1'")
+
+        self.close_conn_and_cursor()
 
     def move_csv_file(self):
         # Se a pasta de destino não existir, crie-a
@@ -101,18 +99,14 @@ class DataTransformServices:
     
     # função para criar tabela e inserir dados
     def sql_create_table_and_insert_data(self, create_table, insert_data, csv_reader, log_sql_create_table, log_sql_insert_data):
-
-        self.conn_and_cursor(self._db_arquive)
-
         logging.debug(f'{log_sql_create_table}')
         self._cursor.execute(create_table)
         logging.debug(f'{log_sql_insert_data}')
         self._cursor.executemany(insert_data, csv_reader)
-
-        self.close_conn_and_cursor()
     
     # detectar o tipo de encode do arquivo
     def detect_encoding(self, file_path):
+        self.conn_and_cursor()
         with open(file_path, 'rb') as f:
             raw_data = f.read()
             result = chardet.detect(raw_data)
@@ -120,6 +114,8 @@ class DataTransformServices:
             confidence = result['confidence']
 
         print(f"Os dados são do tipo {self._encoding} condidence {confidence}")
+
+        self.close_conn_and_cursor()
 
         return self._encoding
     
@@ -133,7 +129,7 @@ class DataTransformServices:
     
     def contar_tipos_de_dados(self):
 
-        self.conn_and_cursor(self._db_arquive)
+        self.conn_and_cursor()
 
         self._cursor.execute(f'''
         PRAGMA table_info('{self._tabela}')
@@ -152,7 +148,7 @@ class DataTransformServices:
 
     def converter_column_value(self):
 
-        self.conn_and_cursor(self._db_arquive)
+        self.conn_and_cursor()
 
         # Obtenha os nomes de todas as colunas, exceto a coluna de interesse
         self._cursor.execute(f'''
@@ -194,7 +190,7 @@ class DataTransformServices:
 
     def converter_uma_coluna(self, column=None):
         
-        self.conn_and_cursor(self._db_arquive)
+        self.conn_and_cursor()
 
         print("Convertendo coluna:")
 
@@ -225,7 +221,7 @@ class DataTransformServices:
         
     def plot_correlation_heatmap(self, coluna_interesse=None):
         
-        self.conn_and_cursor(self._db_arquive)
+        self.conn_and_cursor()
 
         # Obtenha os nomes de todas as colunas, exceto a coluna de interesse
         if coluna_interesse != None:
@@ -263,7 +259,7 @@ class DataTransformServices:
 
     def remover_coluna(self, columns_name=None):
 
-        self.conn_and_cursor(self._db_arquive)
+        self.conn_and_cursor()
 
         if type(columns_name) == list:
             
@@ -284,24 +280,5 @@ class DataTransformServices:
 
         self.close_conn_and_cursor()
 
-    def imprimir_primeiras_linhas_do_db(self, num_linhas=10):
-
-        # Executar o SELECT para buscar as primeiras linhas
-        query = f"SELECT * FROM {self._tabela} LIMIT {num_linhas}"
-        df = pandas.read_sql_query(query, self.conn_and_cursor(self._db_arquive))
-
-        self.close_conn_and_cursor()
-
-        # Imprimir as linhas no formato "pretty"
-        print(df.to_string(index=False))
             
-    def sql_renomear_coluna(self, coluna, rename):
-        self.conn_and_cursor(self._db_arquive)
-
-        self._cursor.execute(f"""
-                             ALTER TABLE {self._tabela}
-                             RENAME COLUMN {coluna} TO {rename};
-        """)
-
-        self.close_conn_and_cursor()
 
