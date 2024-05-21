@@ -281,6 +281,8 @@ class DataTransformServices:
             
         self.close_conn_and_cursor()
 
+        ############## ainda não foi testado ################
+
     def imprimir_primeiras_linhas_do_db(self, num_linhas=10):
 
         # Executar o SELECT para buscar as primeiras linhas
