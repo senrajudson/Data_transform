@@ -44,8 +44,6 @@ class DataTransformServices:
         conn = sqlite3.connect(f"{self._data_csv_file}.db")
         conn.close()
         self.move_csv_file()
-
-        return self._data_csv_file
     
     def conn_and_cursor(self, db_file):
         self._conn = sqlite3.connect(db_file)
@@ -265,23 +263,22 @@ class DataTransformServices:
 
         self.conn_and_cursor(self._db_arquive)
 
-        if type(columns_name) == list:
-            
-            for coluna in columns_name:
+        self._cursor.execute(f'''
+        ALTER TABLE {self._tabela} DROP COLUMN {columns_name}
+        ''')
 
-                self._cursor.execute(f'''
-                ALTER TABLE {self._tabela} DROP COLUMN {coluna}
-                ''')
+        self.close_conn_and_cursor()
 
-            self.close_conn_and_cursor()
-            return
-            
-        if columns_name != None:
+    def remover_colunas(self, columns_name=None):
+
+        self.conn_and_cursor(self._db_arquive)
+
+        for coluna in columns_name:
 
             self._cursor.execute(f'''
-            ALTER TABLE {self._tabela} DROP COLUMN {columns_name}
+            ALTER TABLE {self._tabela} DROP COLUMN {coluna}
             ''')
-
+            
         self.close_conn_and_cursor()
 
     def imprimir_primeiras_linhas_do_db(self, num_linhas=10):

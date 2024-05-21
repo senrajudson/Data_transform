@@ -1,5 +1,6 @@
-*dados_fake.csv
-*db
-*fake_data*
+dados*
+*.db
+*.csv
 *CACHE_DADOS
-*__pycache__
+*pycache*
+*lixo*
